@@ -1,0 +1,17 @@
+service: beta # NOTE: update this with your service name
+provider:
+  name: aws
+  runtime: nodejs8.10
+  stage: ${opt:stage, 'dev'}
+  region: us-east-1
+  environment:
+    ONESIGNAL_URL: ${file(./src/configurations/config.${self:provider.stage}.json):ONESIGNAL_URL}
+    ONESIGNAL_TOKEN: ${file(./src/configurations/config.${self:provider.stage}.json):ONESIGNAL_TOKEN}
+    ONESIGNAL_KEY: ${file(./src/configurations/config.${self:provider.stage}.json):ONESIGNAL_KEY}
+functions:
+  consumer:
+    handler: src/main/sendPush/lambda.handler
+    events:               
+      - sqs: 
+          arn: arn:aws:sqs:us-east-1:828840707062:${self:provider.stage}_be_onesignal_send_push
+          batchSize: 1
